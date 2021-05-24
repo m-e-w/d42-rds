@@ -11,4 +11,4 @@ GROUP BY  res.resource_pk
          ,res.resource_name
          ,res.category
 ORDER BY 
-    is_cluster DESC
+    is_cluster
