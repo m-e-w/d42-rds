@@ -2,4 +2,3 @@ $_host = '192.168.1.0'
 $_username = 'admin'
 $_password = 'adm!nd42'
 $_dry_run = $true
-$_debug = $false
