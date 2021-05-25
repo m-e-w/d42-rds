@@ -1,8 +1,8 @@
 # --- Load config options ---
 .$PSScriptRoot\config.ps1
-$version = 0.12
+$version = 0.13
 
-Write-Host "Version: $($version)`n`n[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`n"
+Write-Host "[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`nVersion: $($version)`nDebug: $($_debug)`n"
 
 # --- Query D42 for RDS instances ---
 Write-Host "[Job-Status] Querying Device42 for RDS Instances...`n"
@@ -26,7 +26,9 @@ $rowIndex = 0
 $rowCount = $rows.count
 foreach ($row in $rows) {
     $rowIndex++;
-    Write-Host "`n[Processing] {$($rowIndex)/$($rowCount)}`t$($row.resource_name)`n"
+    if ($_debug) {
+        Write-Host "`n[Processing] {$($rowIndex)/$($rowCount)}`t$($row.resource_name)`n"
+    }
     $custom_fields += @{
         name  = $row.resource_name
         type  = 'url'
@@ -41,9 +43,11 @@ foreach ($row in $rows) {
             $ips += $fqdn_ips
         }
         else {
-            Write-Host "`n-----[Debug] [Warning] No FQDN found on resource $($row.resource_name): https://$($_host)/admin/rackraj/resource/$($row.resource_pk)/`n" 
+            Write-Host "`n[---Warning] No FQDN found on resource $($row.resource_name): https://$($_host)/admin/rackraj/resource/$($row.resource_pk)/`n" 
         }
-        Write-Host "`t$($fqdn) : [$($fqdn_ips)]"
+        if ($_debug) {
+            Write-Host "`t$($fqdn) : [$($fqdn_ips)]"
+        }
         $fqdn_ips = $null
     }
     $ips = $ips | Select-Object -Unique | Select-Object @{label = "ipaddress"; expression = { $_ } }
@@ -70,17 +74,17 @@ $data["devices"] = $devices
 Write-Host "`n[Job-Status] Processing complete.`n"
 
 if ($_dry_run) {
-    Write-Host "---[Dry Run] Writing to dry_run.json"
+    Write-Host "[---Dry Run] Writing to dry_run.json"
     $data["custom_fields"] = $custom_fields
     $data | ConvertTo-Json -Depth 99 | Out-File dry_run.json
 }
 else {
-    Write-Host "[Job-Status] Posting devices...`n"
+    Write-Host "[Job-Status] Creating/Updating devices...`n"
     # --- Pipe the payload to curl through stdin --- 
     $url = "https://$($_host)/api/1.0/devices/bulk/"
     $data | ConvertTo-Json -Compress -Depth 99 | curl.exe -k -u "$($_username):$($_password)" -X POST $url -H 'Content-Type: application/json' -d "@-"
 
-    Write-Host "`n`n[Job-Status] Posting custom fields...`n"
+    Write-Host "`n`n[Job-Status] Creating/Updating custom fields...`n"
     $url = "https://$($_host)/api/1.0/device/custom_field/"
     foreach ($custom_field in $custom_fields) {
         $custom_field | ConvertTo-Json -Compress -Depth 99 | curl.exe -k -u "$($_username):$($_password)" -X PUT $url -H 'Content-Type: application/json' -d "@-"
