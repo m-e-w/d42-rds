@@ -1,7 +1,8 @@
 # --- Load config options ---
 .$PSScriptRoot\config.ps1
+$version = 0.11
 
-Write-Host "[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`n"
+Write-Host "Version: $($version)`n`n[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`n"
 
 # --- Query D42 for RDS instances ---
 Write-Host "[Job-Status] Querying Device42 for RDS Instances...`n"
