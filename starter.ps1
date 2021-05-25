@@ -1,6 +1,6 @@
 # --- Load config options ---
 .$PSScriptRoot\config.ps1
-$version = 0.11
+$version = 0.12
 
 Write-Host "Version: $($version)`n`n[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`n"
 
@@ -19,14 +19,14 @@ else {
     Write-Host "`n[Job-Status] Query Complete.`t$($rows.count) resources found.`n"
 }
 
-Write-Host "[Job-Status] Processing resources...`n"
+Write-Host "[Job-Status] Processing resources..."
 $devices = @()
 $custom_fields = @()
 $rowIndex = 0
 $rowCount = $rows.count
 foreach ($row in $rows) {
     $rowIndex++;
-    Write-Host "[Processing] {$($rowIndex)/$($rowCount)}`t$($row.resource_name)"
+    Write-Host "`n[Processing] {$($rowIndex)/$($rowCount)}`t$($row.resource_name)`n"
     $custom_fields += @{
         name  = $row.resource_name
         type  = 'url'
@@ -36,13 +36,15 @@ foreach ($row in $rows) {
     $ips = @()
 
     foreach ($fqdn in $row.fqdns) {
-
         if ([string]::IsNullOrEmpty($fqdn) -ne $true) {
-            $ips += @(Resolve-DnsName -Name $fqdn -Type A -ErrorAction SilentlyContinue | Where-object { $_.QueryType -ne "CNAME" } | Select-Object -ExpandProperty IPAddress) 
+            $fqdn_ips = @(Resolve-DnsName -Name $fqdn -Type A -ErrorAction SilentlyContinue | Where-object { $_.QueryType -ne "CNAME" } | Select-Object -ExpandProperty IPAddress) 
+            $ips += $fqdn_ips
         }
         else {
             Write-Host "`n-----[Debug] [Warning] No FQDN found on resource $($row.resource_name): https://$($_host)/admin/rackraj/resource/$($row.resource_pk)/`n" 
-        }  
+        }
+        Write-Host "`t$($fqdn) : [$($fqdn_ips)]"
+        $fqdn_ips = $null
     }
     $ips = $ips | Select-Object -Unique | Select-Object @{label = "ipaddress"; expression = { $_ } }
     
