@@ -10,8 +10,8 @@ $url = "https://$($_host)/services/data/v1.0/query/?query=$($query)&output_type=
 $rows = curl.exe -k -u "$($_username):$($_password)" $url
 if ($rows -eq '{"detail": "You do not have permission to access this resource. You may need to login or otherwise authenticate the request."}') {
     Write-Host "`n-----[Debug] [Error] $($rows)`n`nExiting."
-    Write-Host "`n------------------------------------------------------------------------------------------`n[Job-Status] Job Complete`n"
-    exit`
+    Write-Host "`n------------------------------------------------------------------------------------------`n[Job-Status] Job Complete $(Get-Date)`n"
+    exit
 }
 else {
     $rows = $rows | Convertfrom-Json
