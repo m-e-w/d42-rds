@@ -1,3 +1,6 @@
+# d42-rds
+Short PowerShell script to fetch and then POST RDS resources from Device42 as devices while resolving any associated FQDN's to their respective IP address's in the process.
+
 - [Changelog](#changelog)
 - [Instructions](#instructions)
 - [Notes / Caveats](#notes)
