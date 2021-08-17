@@ -1,6 +1,6 @@
 # --- Load config options ---
 .$PSScriptRoot\config.ps1
-$version = 0.13
+$version = 0.14
 
 Write-Host "[Job-Status] Job Start $(Get-Date)`n------------------------------------------------------------------------------------------`nVersion: $($version)`nDebug: $($_debug)`n"
 
